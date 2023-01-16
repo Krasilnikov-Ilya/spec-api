@@ -1,0 +1,732 @@
+openapi: 3.0.3
+info:
+  title: Training center API
+  description: |-
+    API для практических заданий
+  version: DEV
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Login
+    description: Авторизация
+  - name: Users
+    description: Работа с пользователями
+  - name: Houses
+    description: Работа с домами
+  - name: Cars
+    description: Работа с автомобилями
+paths:
+  /login:
+    post:
+      tags:
+        - Login
+      summary: Получение токена
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '202':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /user:
+    post:
+      tags:
+        - Users
+      summary: Добавление пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Получение списка пользователей
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '204':
+          description: Пользователи отсутствуют
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '503':
+          description: Прочие ошибки
+  /user/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Получение пользователя
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '204':
+          description: Пользователь отсутствует
+          content:
+            application/json:
+              schema:
+                type: object
+    put:
+      tags:
+        - Users
+      summary: Изменение пользователя
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags:
+        - Users
+      summary: Удаление пользователя
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+  /user/{userId}/info:
+    get:
+      tags:
+        - Users
+      summary: Получение пользователя и его имущества
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '204':
+          description: Пользователь отсутствует
+          content:
+            application/json:
+              schema:
+                type: object
+  /user/{userId}/cars:
+    get:
+      tags:
+        - Users
+      summary: Получение списка автомобилей пользователя
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Car'
+        '204':
+          description: Автомобили отсутствуют
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '503':
+          description: Прочие ошибки
+  /user/{userId}/money/{amount}:
+    post:
+      tags:
+        - Users
+      summary: Начисление денег пользователю
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - name: amount
+          in: path
+          description: Сумма
+          required: true
+          schema:
+            type: number
+            description: Деньги
+            format: decimal
+            example: 100.01
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Пользователь не найден
+        '400':
+          description: Некорректный запрос
+        '500':
+          description: Неуспешная операция
+  /user/{userId}/buyCar/{carId}:
+    post:
+      tags:
+        - Users
+      summary: Покупка автомобиля пользователем
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя (покупателя)
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - name: carId
+          in: path
+          description: Идентификатор автомобиля
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /user/{userId}/sellCar/{carId}:
+    post:
+      tags:
+        - Users
+      summary: Продажа автомобиля пользователем
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - name: carId
+          in: path
+          description: Идентификатор автомобиля
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /house:
+    post:
+      tags:
+        - Houses
+      summary: Добавление дома
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /houses:
+    get:
+      tags:
+        - Houses
+      summary: Получение списка домов
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/House'
+        '204':
+          description: Дома отсутствуют
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '503':
+          description: Прочие ошибки
+  /house/{houseId}:
+    get:
+      tags:
+        - Houses
+      summary: Получение дома
+      parameters:
+        - name: houseId
+          in: path
+          description: Идентификатор дома
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+        '204':
+          description: Дом отсутствует
+          content:
+            application/json:
+              schema:
+                type: object
+    put:
+      tags:
+        - Houses
+      summary: Изменение дома
+      parameters:
+        - name: houseId
+          in: path
+          description: Идентификатор дома
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+    delete:
+      tags:
+        - Houses
+      summary: Удаление дома
+      parameters:
+        - name: houseId
+          in: path
+          description: Идентификатор дома
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+  /house/{houseId}/settle/{userId}:
+    post:
+      tags:
+        - Houses
+      summary: Заселить пользоватя в дом
+      parameters:
+        - name: houseId
+          in: path
+          description: Идентификатор дома
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+        '404':
+          description: Дом или пользователь отсутствуют
+        '500':
+          description: Внутренняя ошибка
+        '406':
+          description: Неудачное заселение
+  /house/{houseId}/evict/{userId}:
+    post:
+      tags:
+        - Houses
+      summary: Выселить пользоватя из дома
+      parameters:
+        - name: houseId
+          in: path
+          description: Идентификатор дома
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+        '404':
+          description: Дом или пользователь отсутствуют
+        '500':
+          description: Внутренняя ошибка
+        '406':
+          description: Неудачное выселение
+  /car:
+    post:
+      tags:
+        - Cars
+      summary: Добавление автомобиля
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Car'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+  /cars:
+    get:
+      tags:
+        - Cars
+      summary: Получение списка автомобилей
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Car'
+        '204':
+          description: Автомобили отсутствуют
+        '503':
+          description: Прочие ошибки
+  /car/{carId}:
+    get:
+      tags:
+        - Cars
+      summary: Получение автомобиля
+      parameters:
+        - name: carId
+          in: path
+          description: Идентификатор автомобиля
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+        '204':
+          description: Автомобиль отсутствует
+          content:
+            application/json:
+              schema:
+                type: object
+    put:
+      tags:
+        - Cars
+      summary: Изменение автомобиля
+      parameters:
+        - name: carId
+          in: path
+          description: Идентификатор автомобиля
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Car'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+    delete:
+      tags:
+        - Cars
+      summary: Удаление автомобиля
+      parameters:
+        - name: carId
+          in: path
+          description: Идентификатор автомобиля
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Успешный ответ
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: user@email.com
+        password:
+          type: string
+          example: '********'
+    LoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: yhsHOKmfsiiemslUYFAWBLMPmfdfusi
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        firstName:
+          type: string
+          example: Василий
+        secondName:
+          type: string
+          example: Тестов
+        age:
+          type: integer
+          format: int32
+          description: Возраст
+          example: 19
+        sex:
+          type: string
+          description: Пол
+          example: MALE
+          enum:
+            - MALE
+            - FEMALE
+        money:
+          type: number
+          description: Деньги
+          format: decimal
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        firstName:
+          type: string
+          example: Василий
+        secondName:
+          type: string
+          example: Тестов
+        age:
+          type: integer
+          format: int32
+          description: Возраст
+          example: 19
+        sex:
+          type: string
+          description: Пол
+          example: MALE
+          enum:
+            - MALE
+            - FEMALE
+        money:
+          type: number
+          description: Деньги
+          format: decimal
+        house:
+          type: integer
+          format: int64
+          example: 10
+        cars:
+          type: array
+          items:
+            $ref: '#/components/schemas/Car'
+    Car:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        engineType:
+          type: string
+          description: Тип двигателя. Возможные - Diesel, CNG, Hydrogenic, Electric, PHEV, Gasoline
+          example: Diesel
+        mark:
+          type: string
+          example: Марка
+        model:
+          type: string
+          example: Модель
+        price:
+          type: number
+          description: Стоимость
+          format: decimal
+          example: 10000.99
+    House:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор
+          example: 10
+        floorCount:
+          type: integer
+          format: int32
+          description: Количество этажей
+          example: 5
+        price:
+          type: number
+          description: Стоимость
+          format: decimal
+        parkingPlaces:
+          type: array
+          description: Парковочные места
+          items:
+            $ref: '#/components/schemas/ParkingPlace'
+        lodgers:
+          type: array
+          description: Жители
+          items:
+            $ref: '#/components/schemas/User'
+    ParkingPlace:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор
+          example: 10
+        isWarm:
+          type: boolean
+          description: Отапливаемое
+        isCovered:
+          type: boolean
+          description: Крытое
+        placesCount:
+          type: integer
+          format: int32
+          description: Количество машиномест
+          example: 24
